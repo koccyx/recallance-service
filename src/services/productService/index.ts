@@ -36,4 +36,12 @@ export class ProductService {
 			throw new Error(error);
 		}
 	}
+	
+	async getProducts(userId: number|string) {
+		try {
+			return await ProductModel.find({ owner: userId });
+		} catch (error) {
+			throw new Error(error);
+		}
+	}
 }

@@ -2,10 +2,14 @@ import { Types } from "mongoose";
 import { ToApi } from "@/types/toApi";
 
 export interface User {
-	token: string;
+	password: string;
 	name: string;
-	email: string;
 	products?: Types.ObjectId[];
+}
+
+export interface AuthUser {
+	name: string;
+	password: string;
 }
 
 export interface UserApi extends ToApi<User>{}

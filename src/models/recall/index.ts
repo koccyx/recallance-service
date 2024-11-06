@@ -5,8 +5,9 @@ export const recallSchema = new Schema<Recall>({
 	title: { type: String, required: true },
 	text: { type: String, required: true },
 	author: { type: Schema.Types.ObjectId, ref: "User" },
-	upVotes: { type: Number, required: true },
-	status: { type: String, enum: Object.keys(RecallStatus), required: true }
+	upVotes: { type: Number, required: true, default: 0 },
+	product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+	status: { type: String, enum: Object.keys(RecallStatus), required: true, default: RecallStatus.empty }
 });
 
 recallSchema.set("toJSON", {

@@ -18,9 +18,11 @@ export class ProductController {
 		
 		let product: ProductApi;
 		
+		const { id } = req.user;
+		
 		const productData: ProductApi = {
 			...req.body,
-			owner: req.params['userId'] as string,
+			owner: id,
 			recalls: []
 		}
 		
@@ -44,7 +46,7 @@ export class ProductController {
 		let product: ProductApi;
 		
 		try {
-			const id = req.params['productId'];
+			const { id } = req.user;
 			product = await productService.deleteProduct(id);
 		} catch (error) {
 			console.warn(error);
@@ -66,7 +68,7 @@ export class ProductController {
 		let product:ProductApi;
 		
 		try {
-			const id = req.params['productId'];
+			const { id } = req.user;
 			product = await productService.updateProduct(id, req.body);
 		} catch (error) {
 			console.warn(error);
@@ -75,6 +77,29 @@ export class ProductController {
 		res.status(200).send({
 			message: `Product ${product.title} was updated`
 		})
+	}
+	
+	async getProducts(req: Request, res: Response) {
+		const result = validationResult(req);
+		
+		if(!result.isEmpty()) {
+			res.status(400).send(result.array());
+		}
+		
+		try {
+			const { id } = req.user;
+			
+			const products = await productService.getProducts(id);
+			
+			res.status(200).send({
+				message: "Products were fetched",
+				payload: {
+					product: products
+				}
+			})
+		} catch(err) {
+			console.warn(err);
+		}
 	}
 	
 	async getProduct(req: Request, res: Response) {
@@ -87,7 +112,7 @@ export class ProductController {
 		let product: ProductApi;
 		
 		try {
-			const id = req.params['productId'];
+			const { id } = req.user;
 			product = await productService.getProduct(id);
 		} catch (error) {
 			console.warn(error);

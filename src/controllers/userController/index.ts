@@ -73,7 +73,7 @@ export class UserController {
 	
 	async getUser(req: Request, res: Response) {
 		const result = validationResult(req);
-		
+		console.log(req.user);
 		if(!result.isEmpty()) {
 			res.status(400).send(result.array());
 		}

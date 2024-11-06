@@ -16,17 +16,24 @@ export class RecallController {
 			res.status(400).send(result.array());
 		}
 		
-		let recall: RecallApi;
 		
 		try {
-			recall = await recallService.createRecall(req.body);
+			
+			const recall = {
+				...req.body,
+				product: req.params["productId"],
+				author: req.user.id
+			}
+			
+			const recallAnsw = await recallService.createRecall(recall);
+			res.status(200).send({
+				message: `Recall ${recallAnsw.title} was created`
+			});
 		} catch (error) {
 			console.warn(error);
 		}
 		
-		res.status(200).send({
-			message: `Recall ${recall.title} was created`
-		});
+		
 	}
 	
 	async deleteRecall(req: Request, res: Response) {
@@ -93,5 +100,31 @@ export class RecallController {
 				recall: recall
 			}
 		})
+	}
+	
+	async getRecalls(req: Request, res: Response) {
+		const result = validationResult(req);
+		
+		if(!result.isEmpty()) {
+			res.status(400).send(result.array());
+		}
+		
+		try {
+			const id = req.params['productId'];
+			const recalls = await recallService.getRecalls(id);
+			
+			res.status(200).send({
+				message: "Recalls were fetched",
+				payload: {
+					recalls
+				}
+			})
+		} catch (error) {
+			console.warn(error);
+			
+			res.status(500).send({ message: "Wrong" });
+		}
+		
+		
 	}
 }

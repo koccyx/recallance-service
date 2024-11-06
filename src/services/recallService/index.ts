@@ -37,4 +37,12 @@ export class RecallService {
 			throw new Error(error);
 		}
 	}
+	
+	async getRecalls(productId: number|string) {
+		try {
+			return await RecallModel.find({ product: productId });
+		} catch (error) {
+			throw new Error(error);
+		}
+	}
 }

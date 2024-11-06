@@ -11,6 +11,7 @@ export interface Recall {
 	title: string;
 	text: string;
 	author: Types.ObjectId;
+	product: Types.ObjectId;
 	upVotes: number;
 	status: RecallStatus
 }
