@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { AuthUser } from "@/models/user/types";
-import { UserModel } from "@/models/user";
-import bcrypt from "bcrypt";
 import { UserService } from "@/services/userService";
-import { createAccessToken } from "@/utils/createAccessToken";
 import { TokenService } from "@/services/tokenService";
 
 const userService = new UserService();
@@ -30,8 +27,8 @@ export class AuthController {
 			
 			res.cookie("refreshToken", data.refreshToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
 			
-			res.status(200).send({
-				messages: `Login complete`,
+			return res.status(200).send({
+				message: `Login complete`,
 				refreshToken: data.refreshToken,
 				accessToken: data.accessToken,
 				user: {
@@ -42,7 +39,7 @@ export class AuthController {
 			
 		} catch (error) {
 			console.warn(error);
-			res.status(400).send(error.message);
+			return res.status(400).send(error.message);
 		}
 		
 		

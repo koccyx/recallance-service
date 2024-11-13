@@ -6,5 +6,5 @@ export const createAccessToken = (user) => {
 		user
 	};
 	
-	return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "30m" });
+	return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "30 m" });
 };

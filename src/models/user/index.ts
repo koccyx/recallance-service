@@ -4,7 +4,7 @@ import mongoose, { Schema } from "mongoose";
 export const userSchema = new Schema<UserApi>({
 	password: { type: String, required: true },
 	name: { type: String, required: true, unique: true },
-	products: { type: Schema.Types.ObjectId, ref: "Recall" }
+	products: [{ type: Schema.Types.ObjectId, ref: "Product" }]
 });
 
 userSchema.set("toJSON", {

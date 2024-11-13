@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
 import { ToApi } from "@/types/toApi";
-import { User } from "@/models/user/types";
 
 export interface Product {
 	name: string;

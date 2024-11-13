@@ -1,5 +1,6 @@
 import { Product } from "@/models/product/types";
 import { ProductModel } from "@/models/product";
+import { Recall, RecallApi } from "@/models/recall/types";
 
 export class ProductService {
 	async createProduct(productData: Product) {
@@ -42,6 +43,20 @@ export class ProductService {
 			return await ProductModel.find({ owner: userId });
 		} catch (error) {
 			throw new Error(error);
+		}
+	}
+	
+	async addRecallToProduct(productId: string, recallId: Recall) {
+		try {
+			const product = await ProductModel.findById(productId);
+			
+			if (!product) return;
+			
+			product.recalls.push(recallId);
+			
+			await product.save();
+		} catch(ex) {
+			console.error(ex);
 		}
 	}
 }

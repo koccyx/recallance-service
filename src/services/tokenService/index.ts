@@ -16,11 +16,11 @@ export class TokenService {
 	}
 	
 	async saveTokens(userId, refreshToken) {
-		console.log(userId, refreshToken);
-		const tokenData = await TokenModel.findOneAndUpdate({ user: userId }, { refreshToken });
+		
+		const tokenData = await TokenModel.findOneAndUpdate({ name: userId }, { refreshToken });
 		
 		if(!tokenData) {
-			const token = new TokenModel({ user: userId, refreshToken });
+			const token = new TokenModel({ name: userId, refreshToken });
 			
 			token.save();
 		}

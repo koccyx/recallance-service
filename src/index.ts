@@ -15,7 +15,10 @@ mongoose.connect("mongodb://localhost:27017/main");
 
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+	credentials: true,
+	origin: "http://127.0.0.1:8080",
+}));
 app.use(cookieParser())
 
 app.use("/user", userRouter);

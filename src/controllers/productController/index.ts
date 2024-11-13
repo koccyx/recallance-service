@@ -13,7 +13,7 @@ export class ProductController {
 		const result = validationResult(req);
 		
 		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
+			return res.status(400).send(result.array());
 		}
 		
 		let product: ProductApi;
@@ -28,20 +28,26 @@ export class ProductController {
 		
 		try {
 			product = await productService.createProduct(productData);
+			
+			return res.status(200).send({
+				message: `Product ${product.name} was created`
+			});
 		} catch (error) {
 			console.warn(error);
+			
+			return res.status(400).send({
+				message: `Product was not created`
+			});
 		}
 		
-		res.status(200).send({
-			message: `Product ${product.name} was created`
-		});
+		
 	}
 	
 	async deleteProduct(req: Request, res: Response) {
 		const result = validationResult(req);
 		
 		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
+			return res.status(400).send(result.array());
 		}
 		let product: ProductApi;
 		
@@ -52,7 +58,7 @@ export class ProductController {
 			console.warn(error);
 		}
 		
-		res.status(200).send({
+		return res.status(200).send({
 			messages: `Product ${product.title} was deleted`
 		});
 	}
@@ -75,7 +81,7 @@ export class ProductController {
 		}
 		
 		res.status(200).send({
-			message: `Product ${product.title} was updated`
+			message: `Product ${product.name} was updated`
 		})
 	}
 	
@@ -94,7 +100,7 @@ export class ProductController {
 			res.status(200).send({
 				message: "Products were fetched",
 				payload: {
-					product: products
+					products
 				}
 			})
 		} catch(err) {
@@ -112,17 +118,19 @@ export class ProductController {
 		let product: ProductApi;
 		
 		try {
-			const { id } = req.user;
-			product = await productService.getProduct(id);
+			const { productId } = req.params;
+			product = await productService.getProduct(productId);
+
+			return res.status(200).send({
+				message: "Product was fetched",
+				payload: {
+					product
+				}
+			})
 		} catch (error) {
 			console.warn(error);
 		}
 		
-		res.status(200).send({
-			message: "Product was fetched",
-			payload: {
-				product: product
-			}
-		})
+		
 	}
 }

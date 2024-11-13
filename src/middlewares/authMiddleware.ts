@@ -11,11 +11,10 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 		
 		const userData = tokenService.validateAccessToken(token);
 		
-		console.log(userData);
-		req.user = userData.user;
+		req.user = userData!.user;
 		next();
 	} catch (err) {
 		console.log(err);
-		res.status(403).send("User is unauthorized");
+		res.status(401).send("User is unauthorized");
 	}
 };

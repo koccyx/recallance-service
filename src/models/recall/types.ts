@@ -10,10 +10,33 @@ export enum RecallStatus {
 export interface Recall {
 	title: string;
 	text: string;
-	author: Types.ObjectId;
+	authorId: Types.ObjectId;
+	authorName: string;
 	product: Types.ObjectId;
 	upVotes: number;
-	status: RecallStatus
+	upVotedBy?: Types.ObjectId[];
+	status: RecallStatus;
+	id?: string;
 }
 
-export interface RecallApi extends ToApi<Recall>{}
+export interface RecallApi extends Omit<ToApi<Recall>, "UpVotedBy">{
+	isUpvoted: boolean;
+}
+
+export class RecallMappper {
+	
+	static map(source: Recall, userId: Types.ObjectId): RecallApi {
+		return {
+			id: source.id!,
+			title: source.title,
+			text: source.text,
+			authorId: source.authorId,
+			authorName: source.authorName,
+			product: source.product,
+			upVotes: source.upVotedBy ? source.upVotedBy!.length : 0,
+			isUpvoted: source.upVotedBy ? source.upVotedBy!.includes(userId) : false,
+			status: source.status!
+		};
+	}
+	
+}

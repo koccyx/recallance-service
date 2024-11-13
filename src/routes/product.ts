@@ -1,5 +1,4 @@
 import express from "express";
-import { RecallController } from "@/controllers/recallController";
 import { ProductController } from "@/controllers/productController";
 import { body } from "express-validator";
 import { authMiddleware } from "@/middlewares/authMiddleware";

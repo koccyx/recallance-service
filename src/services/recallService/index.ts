@@ -40,7 +40,15 @@ export class RecallService {
 	
 	async getRecalls(productId: number|string) {
 		try {
-			return await RecallModel.find({ product: productId });
+			return await RecallModel.find({ product: productId }).sort({ upVotes: -1 });
+		} catch (error) {
+			throw new Error(error);
+		}
+	}
+	
+	async getRecallsByTitle(productId: number|string, search: string) {
+		try {
+			return await RecallModel.find({ product: productId, title: { $regex: search, $options: 'i' } }).sort({ upVotes: -1 });
 		} catch (error) {
 			throw new Error(error);
 		}
