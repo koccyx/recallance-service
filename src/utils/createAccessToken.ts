@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { ACCESS_SECRET } from "@/utils/secret";
+import process from "node:process";
 
 export const createAccessToken = (user) => {
 	const payload = {
 		user
 	};
 	
-	return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "30 m" });
+	return jwt.sign(payload, process.env.ACCESS_SECRET!, { expiresIn: "30 m" });
 };

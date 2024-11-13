@@ -2,7 +2,7 @@ import { createAccessToken } from "@/utils/createAccessToken";
 import { createRefreshToken } from "@/utils/createRefreshToken";
 import { TokenModel } from "@/models/token";
 import jwt from "jsonwebtoken";
-import { ACCESS_SECRET, REFRESH_SECRET } from "@/utils/secret";
+import * as process from "node:process";
 
 export class TokenService {
 	generateTokens(payload) {
@@ -40,7 +40,7 @@ export class TokenService {
 	
 	validateAccessToken(token: string) {
 		try {
-			const userData = jwt.verify(token, ACCESS_SECRET);
+			const userData = jwt.verify(token, process.env.ACCESS_SECRET!);
 			
 			return userData;
 		} catch(err) {
@@ -50,7 +50,7 @@ export class TokenService {
 	
 	async validateRefreshToken(token: string) {
 		try {
-			const userData = await jwt.verify(token, REFRESH_SECRET);
+			const userData = await jwt.verify(token, process.env.REFRESH_SECRET!);
 			
 			return userData;
 		} catch(err) {

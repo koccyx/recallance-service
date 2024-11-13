@@ -13,7 +13,6 @@ router.post("/registration", [
 router.post("/login", [
 	check("name", "User name shouldnt be empty").notEmpty(),
 	check("password", "User password should be more then 6 symbols").isLength({ min: 6 })], authController.login);
-router.get("/users", authController.getUsers);
 router.get("/refresh", authController.refresh);
 router.post("/logout", authController.logout);
 

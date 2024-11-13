@@ -1,32 +1,33 @@
-import express, { Request, Response } from "express";
-import { router as userRouter } from "@/routes/user";
-import { router as recallRouter } from "@/routes/recall";
-import { router as productRouter } from "@/routes/product";
-import { router as commentRouter } from "@/routes/comment";
-import { router as authRouter } from "@/routes/auth";
-
+import express from "express";
+import "dotenv/config";
 import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import * as process from "node:process";
+import { router as recallRouter } from "@/routes/recall";
+import { router as productRouter } from "@/routes/product";
+import { router as authRouter } from "@/routes/auth";
+import { exceptionMiddleware } from "@/middlewares/exceptionMiddleware";
 
 const app = express();
-const port = 3000;
-mongoose.connect("mongodb://localhost:27017/main");
+const port = process.env.DEFAULT_PORT;
+mongoose.connect(process.env.MONGO_URI!);
 
 
 app.use(express.json());
 app.use(cors({
 	credentials: true,
-	origin: "http://127.0.0.1:8080",
+	origin: process.env.WEBAPP_BASE_URL
 }));
-app.use(cookieParser())
+app.use(cookieParser());
 
-app.use("/user", userRouter);
 app.use("/product/:productId/recall", recallRouter);
 app.use("/product", productRouter);
-app.use("/recall/:recallId/comment", commentRouter);
-app.use("/auth", authRouter)
+app.use("/auth", authRouter);
+
+app.use(exceptionMiddleware);
+
 
 app.listen(port, () => {
-	console.log(`Example app listening FUCK on port ${port}`);
+	console.log(`Example app listening on port ${port}`);
 });

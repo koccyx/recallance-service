@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { RecallService } from "@/services/recallService";
-import { Recall, RecallApi, RecallMappper } from "@/models/recall/types";
+import { RecallApi, RecallMappper } from "@/models/recall/types";
 import { ProductService } from "@/services/productService";
+import { ApiError } from "@/exceptions/apiError";
 
 const recallService = new RecallService();
 const productService = new ProductService();
@@ -11,15 +12,14 @@ export class RecallController {
 	constructor() {
 	}
 	
-	async createRecall(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
-		
+	async createRecall(req: Request, res: Response, next: NextFunction) {
 		try {
+			
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
 			
 			const { productId } = req.params;
 			
@@ -38,87 +38,96 @@ export class RecallController {
 				message: `Recall ${recallAnsw.title} was created`
 			});
 		} catch (error) {
-			console.warn(error);
+			next(error);
 		}
 		
 		
 	}
 	
-	async deleteRecall(req: Request, res: Response) {
-		const result = validationResult(req);
+	async deleteRecall(req: Request, res: Response, next: NextFunction) {
 		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		let recall: RecallApi;
 		
 		try {
+			
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
+			let recall: RecallApi;
+			
 			const id = req.params["recallId"];
 			recall = await recallService.deleteRecall(id);
+			
+			return res.status(200).send({
+				messages: `Recall ${recall.title} was deleted`
+			});
 		} catch (error) {
-			console.warn(error);
+			next(error);
 		}
 		
-		res.status(200).send({
-			messages: `Recall ${recall.title} was deleted`
-		});
+		
 	}
 	
 	
-	async updateRecall(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
-		let recall: RecallApi;
-		
+	async updateRecall(req: Request, res: Response, next: NextFunction) {
 		try {
-			const id = req.params["recallId"];
-			recall = await recallService.updateRecall(id, req.body);
-		} catch (error) {
-			console.warn(error);
-		}
-		
-		res.status(200).send({
-			message: `recall ${recall.title} was updated`
-		});
-	}
-	
-	async getRecall(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
-		let recall: RecallApi;
-		
-		try {
-			const id = req.params["recallId"];
-			recall = await recallService.getRecall(id);
-		} catch (error) {
-			console.warn(error);
-		}
-		
-		res.status(200).send({
-			message: "recall was fetched",
-			payload: {
-				recall: recall
+			
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
 			}
-		});
+			
+			const id = req.params["recallId"];
+			
+			const recall = await recallService.updateRecall(id, req.body);
+			
+			if(!recall) throw ApiError.BadRequest("Not enough data", result.array());
+			
+			return res.status(200).send({
+				message: `recall ${recall!.title} was updated`
+			});
+		} catch (error) {
+			next(error);
+		}
+		
+		
+	}
+	
+	async getRecall(req: Request, res: Response, next: NextFunction) {
+		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
+			const id = req.params["recallId"];
+			
+			const recall = await recallService.getRecall(id);
+			
+			return res.status(200).send({
+				message: "recall was fetched",
+				payload: {
+					recall: recall
+				}
+			});
+		} catch (error) {
+			next(error);
+		}
 	}
 	
 	
-	async getRecalls(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			return res.status(400).send(result.array());
-		}
-		
+	async getRecalls(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
 			const id = req.params["productId"];
 			const { id: userId } = req.user;
 			
@@ -128,36 +137,33 @@ export class RecallController {
 			
 			const mappedRecalls = recalls.map((recall) => RecallMappper.map(recall, userId));
 			
-			res.status(200).send({
+			return res.status(200).send({
 				message: "Recalls were fetched",
 				payload: {
 					recalls: mappedRecalls
 				}
 			});
 		} catch (error) {
-			console.warn(error);
-			
-			res.status(500).send({ message: "Wrong" });
+			next(error);
 		}
 	}
 	
-	async likeRecall(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			return res.status(400).send(result.array());
-		}
-		
+	async likeRecall(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
+			
 			const id = req.params["recallId"];
 			const { id: userId } = req.user;
 			
 			const recall = await recallService.getRecall(id);
 			
 			if(!recall) {
-				return res.status(404).send({
-					message: "Not found recall"
-				});
+				throw ApiError.BadRequest("Recall not found", result.array());
 			}
 			
 			recall.upVotedBy!.push(userId);
@@ -171,35 +177,31 @@ export class RecallController {
 				}
 			});
 		} catch (error) {
-			console.warn(error);
-			
-			res.status(500).send({ message: "Recall error" });
+			next(error);
 		}
 	}
 	
-	async unLikeRecall(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			return res.status(400).send(result.array());
-		}
-		
+	async unLikeRecall(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
 			const id = req.params["recallId"];
 			const { id: userId } = req.user;
 			
 			const recall = await recallService.getRecall(id);
 			
 			if(!recall) {
-				return res.status(404).send({
-					message: "Not found recall"
-				});
+				throw ApiError.BadRequest("Recall not found", result.array());
 			}
 			
 			recall.upVotedBy = recall.upVotedBy!.filter((user) => {
 				return !user.equals(userId);
 			});
-			console.log(recall.upVotedBy);
+			
 			await recall.save();
 			
 			return res.status(200).send({
@@ -209,29 +211,25 @@ export class RecallController {
 				}
 			});
 		} catch (error) {
-			console.warn(error);
-			
-			return res.status(500).send({ message: "Recall error" });
+			next(error);
 		}
 	}
 	
-	async changeStatus(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			return res.status(400).send(result.array());
-		}
-		
+	async changeStatus(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
 			const id = req.params["recallId"];
 			const { id: userId } = req.user;
 			
 			const recall = await recallService.getRecall(id);
 			
 			if(!recall) {
-				return res.status(404).send({
-					message: "Not found recall"
-				});
+				throw ApiError.BadRequest("Recall not found", result.array());
 			}
 			
 			const { status } = req.body;
@@ -246,9 +244,7 @@ export class RecallController {
 				}
 			});
 		} catch (error) {
-			console.warn(error);
-			
-			return res.status(500).send({ message: "Recall error" });
+			next(error);
 		}
 	}
 }

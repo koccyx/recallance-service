@@ -1,23 +1,22 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { AuthUser } from "@/models/user/types";
 import { UserService } from "@/services/userService";
-import { TokenService } from "@/services/tokenService";
+import { ApiError } from "@/exceptions/apiError";
 
 const userService = new UserService();
-const tokenService = new TokenService();
+
 export class AuthController {
 	constructor() {
 	}
 	
-	async login(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
+	async login(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
 			
 			const userData: AuthUser = {
 				...req.body
@@ -38,21 +37,20 @@ export class AuthController {
 			});
 			
 		} catch (error) {
-			console.warn(error);
-			return res.status(400).send(error.message);
+			next(error);
 		}
 		
 		
 	}
 	
-	async registration(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
+	async registration(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
 			
 			const user: AuthUser = {
 				...req.body
@@ -62,7 +60,7 @@ export class AuthController {
 			
 			res.cookie("refreshToken", registeredUser.refreshToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
 			
-			res.status(200).send({
+			return res.status(200).send({
 				messages: `User registred`,
 				refreshToken: registeredUser.refreshToken,
 				accessToken: registeredUser.accessToken,
@@ -73,49 +71,48 @@ export class AuthController {
 				
 			});
 		} catch (error) {
-			console.warn(error);
-			res.status(400).send("Login error");
+			next(error);
 		}
 	}
 	
-	async logout(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
+	async logout(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
+			
 			const { refreshToken } = req.cookies;
 			
 			const token = await userService.logout(refreshToken)
 			
 			res.clearCookie("refreshToken");
 			
-			res.status(200).send({
+			return res.status(200).send({
 				message: `User logged out`,
 				token
 			});
 		} catch (error) {
-			console.warn(error);
-			res.status(400).send("Logout error");
+			next(error);
 		}
 	}
 	
-	async refresh(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
+	async refresh(req: Request, res: Response, next: NextFunction) {
 		try {
+			const result = validationResult(req);
+			
+			if(!result.isEmpty()) {
+				throw ApiError.BadRequest("Not enough data", result.array());
+			}
+			
 			const { refreshToken } = req.cookies;
 			const userData= await userService.refresh(refreshToken)
 			
 			res.cookie("refreshToken", userData.refreshToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
 			
-			res.status(200).send({
+			return res.status(200).send({
 				messages: `Refresh complete`,
 				refreshToken: userData.refreshToken,
 				accessToken: userData.accessToken,
@@ -126,31 +123,7 @@ export class AuthController {
 			});
 			
 		} catch (error) {
-			console.warn(error);
-			res.status(400).send("Refresh error");
+			next(error);
 		}
-		
-		
 	}
-	
-	
-	async getUsers(req: Request, res: Response) {
-		const result = validationResult(req);
-		
-		if(!result.isEmpty()) {
-			res.status(400).send(result.array());
-		}
-		
-		
-		try {
-		
-		} catch (error) {
-			console.warn(error);
-		}
-		
-		res.status(200).send({
-			message: `Comment was updated`
-		});
-	}
-	
 }

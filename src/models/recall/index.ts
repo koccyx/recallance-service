@@ -17,13 +17,13 @@ recallSchema.pre('save', function (next) {
 	next();
 });
 
-// Для операций обновления, если используется findOneAndUpdate
 recallSchema.pre('findOneAndUpdate', function (next) {
 	const update = this.getUpdate();
+	
 	if(update && update.upVotedBy) {
-		// Если массив обновляется, пересчитываем длину
 		update.upVotes = update.upVotedBy.length;
 	}
+	
 	next()
 });
 

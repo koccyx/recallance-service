@@ -1,8 +1,8 @@
-import { AuthUser, User, UserApi } from "@/models/user/types";
+import { User, UserApi } from "@/models/user/types";
 import { UserModel } from "@/models/user";
 import bcrypt from "bcrypt";
 import { TokenService } from "@/services/tokenService";
-import { createAccessToken } from "@/utils/createAccessToken";
+import { ApiError } from "@/exceptions/apiError";
 
 const tokenService = new TokenService();
 export class UserService {
@@ -13,7 +13,7 @@ export class UserService {
 			
 			return user;
 		} catch (error) {
-			throw new Error(error);
+			throw ApiError.BadRequest(error.message);
 		}
 	}
 	
@@ -54,7 +54,7 @@ export class UserService {
 		const candidate = await UserModel.findOne({ name });
 		
 		if(candidate) {
-			throw new Error("Пользователь с таким именем уже существует");
+			throw ApiError.BadRequest("User with such a name already exists");
 		}
 		
 		const hashedPassword = bcrypt.hashSync(password, 7);
@@ -78,12 +78,12 @@ export class UserService {
 		const user = await this.findUserByName( name );
 		
 		if(!user) {
-			throw new Error("No user with such a name");
+			throw ApiError.BadRequest("No user with such a name");
 		}
 		
 		const validPassword = bcrypt.compareSync(password, user.password);
 		
-		if(!validPassword) throw new Error("Wrong password");
+		if(!validPassword) throw ApiError.BadRequest("Wrong password");
 		
 		const tokens = tokenService.generateTokens(user);
 		
@@ -103,14 +103,14 @@ export class UserService {
 	
 	async refresh(refreshToken: string) {
 		if(!refreshToken) {
-			throw new Error("No refresh token");
+			throw ApiError.BadRequest("No refresh token");
 		}
 		
 		const { id: user } = await tokenService.validateRefreshToken(refreshToken);
 		const tokenFromDb = tokenService.findToken(refreshToken);
 		
 		if(!user || !tokenFromDb) {
-			throw new Error("Unauthorized Error");
+			throw ApiError.Unauthorized();
 		}
 		
 		const userFromDb = await UserModel.findById(user.id) as UserApi;

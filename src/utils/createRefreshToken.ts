@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { REFRESH_SECRET } from "@/utils/secret";
+import process from "node:process";
 
 export const createRefreshToken = (id) => {
 	const payload = {
 		id
 	};
 	
-	return jwt.sign(payload, REFRESH_SECRET, { expiresIn: "24h" });
+	return jwt.sign(payload, process.env.REFRESH_SECRET!, { expiresIn: "24h" });
 };
